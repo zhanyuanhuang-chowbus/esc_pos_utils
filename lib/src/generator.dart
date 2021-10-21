@@ -81,6 +81,7 @@ class Generator {
   }
 
   List _getLexemes(String text) {
+    if(text.length == 0) return [];
     final List<String> lexemes = [];
     final List<bool> isLexemeChinese = [];
     int start = 0;
@@ -536,23 +537,31 @@ class Generator {
               text: '', width: cols[i].width, styles: cols[i].styles));
         }
 
-        // Print current row
-        final list = _getLexemes(toPrint);
-        final List<String> lexemes = list[0];
-        final List<bool> isLexemeChinese = list[1];
+        bytes += _text(
+          _encode(toPrint, isKanji: true),
+          styles: cols[i].styles,
+          colInd: colInd,
+          colWidth: cols[i].width,
+          isKanji: true,
+        );
 
-        // Print each lexeme using codetable OR kanji
-        for (var j = 0; j < lexemes.length; ++j) {
-          bytes += _text(
-            _encode(lexemes[j], isKanji: isLexemeChinese[j]),
-            styles: cols[i].styles,
-            colInd: colInd,
-            colWidth: cols[i].width,
-            isKanji: isLexemeChinese[j],
-          );
-          // Define the absolute position only once (we print one line only)
-          // colInd = null;
-        }
+        // // Print current row
+        // final list = _getLexemes(toPrint);
+        // final List<String> lexemes = list[0];
+        // final List<bool> isLexemeChinese = list[1];
+        //
+        // // Print each lexeme using codetable OR kanji
+        // for (var j = 0; j < lexemes.length; ++j) {
+        //   bytes += _text(
+        //     _encode(lexemes[j], isKanji: isLexemeChinese[j]),
+        //     styles: cols[i].styles,
+        //     colInd: colInd,
+        //     colWidth: cols[i].width,
+        //     isKanji: isLexemeChinese[j],
+        //   );
+        //   // Define the absolute position only once (we print one line only)
+        //   // colInd = null;
+        // }
       }
     }
 
