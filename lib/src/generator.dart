@@ -16,7 +16,7 @@ import 'enums.dart';
 import 'commands.dart';
 
 class Generator {
-  Generator(this._paperSize, this._profile);
+  Generator(this._paperSize, this._profile, {this.spaceBetweenRows = 2});
 
   // Ticket config
   final PaperSize _paperSize;
@@ -27,7 +27,7 @@ class Generator {
   PosFontType? _font;
   // Current styles
   PosStyles _styles = PosStyles();
-  // int spaceBetweenRows;
+  int spaceBetweenRows;
 
   // ************************ Internal helpers ************************
   int _getMaxCharsPerLine(PosFontType? font) {
@@ -480,7 +480,7 @@ class Generator {
       double charWidth = _getCharWidth(cols[i].styles);
       double fromPos = _colIndToPosition(colInd);
       final double toPos =
-          _colIndToPosition(colInd + cols[i].width);
+          _colIndToPosition(colInd + cols[i].width) - spaceBetweenRows;
       int maxCharactersNb = ((toPos - fromPos) / charWidth).floor();
 
       if (!cols[i].containsChinese) {
@@ -795,7 +795,7 @@ class Generator {
       if (colWidth != 12) {
         // Update fromPos
         final double toPos =
-            _colIndToPosition(colInd + colWidth);
+            _colIndToPosition(colInd + colWidth) - spaceBetweenRows;
         final double textLen = textBytes.length * charWidth;
 
         if (styles.align == PosAlign.right) {
