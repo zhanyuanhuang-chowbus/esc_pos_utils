@@ -16,7 +16,7 @@ import 'enums.dart';
 import 'commands.dart';
 
 class Generator {
-  Generator(this._paperSize, this._profile, {this.spaceBetweenRows = 5});
+  Generator(this._paperSize, this._profile);
 
   // Ticket config
   final PaperSize _paperSize;
@@ -27,7 +27,7 @@ class Generator {
   PosFontType? _font;
   // Current styles
   PosStyles _styles = PosStyles();
-  int spaceBetweenRows;
+  // int spaceBetweenRows;
 
   // ************************ Internal helpers ************************
   int _getMaxCharsPerLine(PosFontType? font) {
@@ -346,6 +346,7 @@ class Generator {
     String text, {
     PosStyles styles = const PosStyles(),
     int linesAfter = 0,
+    int lineSpace = 0,
     bool containsChinese = false,
     int? maxCharsPerLine,
   }) {
@@ -361,6 +362,10 @@ class Generator {
       bytes += emptyLines(linesAfter + 1);
     } else {
       bytes += _mixedKanji(text, styles: styles, linesAfter: linesAfter);
+    }
+    if(lineSpace != 0) {
+      bytes += rawBytes(List.from("${esc}J".codeUnits)
+        ..add(lineSpace));
     }
     return bytes;
   }
@@ -460,7 +465,7 @@ class Generator {
   ///
   /// A row contains up to 12 columns. A column has a width between 1 and 12.
   /// Total width of columns in one row must be equal 12.
-  List<int> row(List<PosColumn> cols) {
+  List<int> row(List<PosColumn> cols, {int lineSpace = 0}) {
     List<int> bytes = [];
     final isSumValid = cols.fold(0, (int sum, col) => sum + col.width) == 12;
     if (!isSumValid) {
@@ -475,7 +480,7 @@ class Generator {
       double charWidth = _getCharWidth(cols[i].styles);
       double fromPos = _colIndToPosition(colInd);
       final double toPos =
-          _colIndToPosition(colInd + cols[i].width) - spaceBetweenRows;
+          _colIndToPosition(colInd + cols[i].width);
       int maxCharactersNb = ((toPos - fromPos) / charWidth).floor();
 
       if (!cols[i].containsChinese) {
@@ -566,9 +571,12 @@ class Generator {
     }
 
     bytes += emptyLines(1);
-
+    if(lineSpace != 0) {
+      bytes += rawBytes(List.from("${esc}J".codeUnits)
+        ..add(lineSpace));
+    }
     if (isNextRow) {
-      bytes += row(nextRow);
+      bytes += row(nextRow , lineSpace: lineSpace);
     }
     return bytes;
   }
@@ -787,7 +795,7 @@ class Generator {
       if (colWidth != 12) {
         // Update fromPos
         final double toPos =
-            _colIndToPosition(colInd + colWidth) - spaceBetweenRows;
+            _colIndToPosition(colInd + colWidth);
         final double textLen = textBytes.length * charWidth;
 
         if (styles.align == PosAlign.right) {
