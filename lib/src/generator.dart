@@ -474,6 +474,8 @@ class Generator {
     bool isNextRow = false;
     List<PosColumn> nextRow = <PosColumn>[];
 
+    int allCharactersNb = 0;
+
     for (int i = 0; i < cols.length; ++i) {
       int colInd =
           cols.sublist(0, i).fold(0, (int sum, col) => sum + col.width);
@@ -481,7 +483,13 @@ class Generator {
       double fromPos = _colIndToPosition(colInd);
       final double toPos =
           _colIndToPosition(colInd + cols[i].width) - spaceBetweenRows;
-      int maxCharactersNb = ((toPos - fromPos) / charWidth).floor();
+      int maxCharactersNb;
+      if (i == cols.length - 1) {
+        maxCharactersNb = _getMaxCharsPerLine(_font) - allCharactersNb;
+      } else {
+        maxCharactersNb = ((toPos - fromPos) / charWidth).floor();
+        allCharactersNb+=maxCharactersNb;
+      }
 
       if (!cols[i].containsChinese) {
         // CASE 1: containsChinese = false
