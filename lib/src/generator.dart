@@ -475,7 +475,7 @@ class Generator {
 
         // If the col's content is too long, split it to the next row
         int realCharactersNb = toPrint.length;
-        if (realCharactersNb >= maxCharactersNb) {
+        if (realCharactersNb > maxCharactersNb) {
           // Print max possible and split to the next row
           String toPrintNextRow = toPrint.substring(maxCharactersNb);
           toPrint = toPrint.substring(0, maxCharactersNb);
@@ -499,7 +499,7 @@ class Generator {
         int splitPos = 0;
         for (int p = 0; p < cols[i].text.length; ++p) {
           final int w = _isChinese(cols[i].text[p]) ? 2 : 1;
-          if (counter + w >= maxCharactersNb) {
+          if (counter + w > maxCharactersNb) {
             break;
           }
           counter += w;
