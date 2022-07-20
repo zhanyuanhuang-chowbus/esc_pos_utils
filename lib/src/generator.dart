@@ -18,7 +18,7 @@ import 'commands.dart';
 import 'enums.dart';
 
 class Generator {
-  Generator(this._paperSize, this._profile, {this.spaceBetweenRows = 2});
+  Generator(this._paperSize, this._profile, {this.spaceBetweenRows = 0});
 
   // Ticket config
   final PaperSize _paperSize;
