@@ -461,40 +461,33 @@ class Generator {
     bool isNextRow = false;
     List<PosColumn> nextRow = <PosColumn>[];
 
-    int allCharactersNb = 0;
-
     for (int i = 0; i < cols.length; ++i) {
       int colInd = cols.sublist(0, i).fold(0, (int sum, col) => sum + col.width);
       double charWidth = _getCharWidth(cols[i].styles);
       double fromPos = _colIndToPosition(colInd);
       final double toPos = _colIndToPosition(colInd + cols[i].width) - spaceBetweenRows;
       int maxCharactersNb;
-      if (i == cols.length - 1) {
-        maxCharactersNb = _getMaxCharsPerLine(_font) - allCharactersNb;
-      } else {
-        maxCharactersNb = ((toPos - fromPos) / charWidth).floor();
-        allCharactersNb += maxCharactersNb * cols[i].styles.width.value;
-      }
+      maxCharactersNb = ((toPos - fromPos) / charWidth).floor();
 
       if (!cols[i].containsChinese) {
         // CASE 1: containsChinese = false
-        Uint8List encodedToPrint = cols[i].textEncoded != null ? cols[i].textEncoded! : _encode(cols[i].text);
+        String toPrint = cols[i].text;
 
         // If the col's content is too long, split it to the next row
-        int realCharactersNb = encodedToPrint.length;
-        if (realCharactersNb > maxCharactersNb) {
+        int realCharactersNb = toPrint.length;
+        if (realCharactersNb >= maxCharactersNb) {
           // Print max possible and split to the next row
-          Uint8List encodedToPrintNextRow = encodedToPrint.sublist(maxCharactersNb);
-          encodedToPrint = encodedToPrint.sublist(0, maxCharactersNb);
+          String toPrintNextRow = toPrint.substring(maxCharactersNb);
+          toPrint = toPrint.substring(0, maxCharactersNb);
           isNextRow = true;
-          nextRow.add(PosColumn(textEncoded: encodedToPrintNextRow, width: cols[i].width, styles: cols[i].styles));
+          nextRow.add(PosColumn(text: toPrintNextRow, width: cols[i].width, styles: cols[i].styles));
         } else {
           // Insert an empty col
           nextRow.add(PosColumn(text: '', width: cols[i].width, styles: cols[i].styles));
         }
         // end rows splitting
         bytes += _text(
-          encodedToPrint,
+          _encode(toPrint),
           styles: cols[i].styles,
           colInd: colInd,
           colWidth: cols[i].width,
@@ -505,7 +498,7 @@ class Generator {
         int counter = 0;
         int splitPos = 0;
         for (int p = 0; p < cols[i].text.length; ++p) {
-          final int w = _isChinese(cols[i].text[p]) ? 2 * cols[i].styles.width.value : cols[i].styles.width.value;
+          final int w = _isChinese(cols[i].text[p]) ? 2 : 1;
           if (counter + w >= maxCharactersNb) {
             break;
           }
@@ -557,7 +550,16 @@ class Generator {
       bytes += rawBytes(List.from("${esc}J".codeUnits)..add(lineSpace));
     }
     if (isNextRow) {
-      bytes += row(nextRow, lineSpace: lineSpace);
+      bool isBlank = true;
+      for (var element in nextRow) {
+        if (element.text.trim().isNotEmpty) {
+          isBlank = false;
+          break;
+        }
+      }
+      if (!isBlank) {
+        bytes += row(nextRow, lineSpace: lineSpace);
+      }
     }
     return bytes;
   }
