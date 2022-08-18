@@ -51,7 +51,7 @@ class Generator {
 
   double _colIndToPosition(int colInd) {
     final int width = _paperSize.width;
-    return colInd == 0 ? 0 : (width * colInd / 12 - 1);
+    return colInd == 0 ? 0 : (width * colInd / 12);
   }
 
   int _getCharsPerLine(PosStyles styles, int? maxCharsPerLine) {
@@ -466,8 +466,7 @@ class Generator {
       double charWidth = _getCharWidth(cols[i].styles);
       double fromPos = _colIndToPosition(colInd);
       final double toPos = _colIndToPosition(colInd + cols[i].width) - spaceBetweenRows;
-      int maxCharactersNb;
-      maxCharactersNb = ((toPos - fromPos) / charWidth).floor();
+      int maxCharactersNb = ((toPos - fromPos) / charWidth).floor();
 
       if (!cols[i].containsChinese) {
         // CASE 1: containsChinese = false
